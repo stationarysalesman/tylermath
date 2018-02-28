@@ -1,80 +1,84 @@
 import numpy as np
 
-def calcRelaxationTimes(diam, height):
-    """Calculate the relaxation times of a disk of given diameter and height."""
-    
-    # Some definitions    
-    longitudinalAxis = height / 2.
-    radialAxis = diam / 2.
-    rho = longitudinalAxis / radialAxis
-    T = 293.15 # temperature in Kelvin
-
-    # Calculate D, the rotational diffusion constant of a sphere with volume of disk
-    # (we will approximate volume of disk using cylinder)
-    V = np.pi * np.power(radialAxis, 2) * height
-    eta = 1.002e-3 # dynamic, or shear, viscosity of water, in kg/(m*s)
+def sphereHydrodynamics(V):
+    """Display hydrodynamic properties of a sphere of volume V."""
     kT = 1.38e-23 * 293.15
+    eta = 1.002e-3 # kg/(m*s)
     D = kT / (6 * V * eta)
-    tau_D = 1 / (6 * D)
-    
+    tau = 1 / (6 * D)
+    return (D, tau)
 
+def calcDiffusionConstants(rho):
+    """Calculate the diffusion constants of a disk of given axial ratio, relative to that of a sphere."""
+    print('rho is {}'.format(rho))
     # calculate S' from rho
-    S_prime = None
-    term_a = float(np.power(rho, 2) - 1)
-    term_b = float(1 - np.power(rho, 2))
+    S_prime = 0.0 
+    term_a = float(rho ** 2 - 1)
+    term_b = float(1 - rho ** 2)
+    print('term_a: {}'.format(term_a))
+    print('term_b: {}'.format(term_b))
     if rho < 1:
-        term_c = np.power(term_b, -0.5)
-        S_prime = term_c * np.arctan(term_c / rho)
+        a  = 1 - (rho**2)
+        b = 1./np.sqrt(a)
+        c = np.sqrt(a) 
+        S_prime = b * np.arctan(c / rho)
     elif rho > 1:
-        term_c = np.power(term_a, -0.5)
-        term_d = np.power(term_a, 0.5)
-        S_prime = term_c * np.log(rho + term_d)
+        a = (rho ** 2) - 1
+        b = 1./np.sqrt(a)
+        c = np.sqrt(a)
+        S_prime = b * np.log(rho + c)
     else:
-        return [tau_D, tau_D, tau_D] 
-    
+        print('no111!!!')
+        return [1,1] 
+    print('finally, S is {}'.format(S_prime)) 
     # Calculate the anisotropic components of rotational diffusion, i.e. D_parallel and D_perp
-    f_numerator = rho * (rho - S_prime)
-    f_denom = term_a
-    D_parallel = (3/2.) * (f_numerator / f_denom) * D
-    paren = 2 * np.power(rho, 2) - 1
-    f_numerator = rho * (paren * S_prime - rho)
-    f_denom = np.power(rho, 4) - 1
-    D_perp = (3/2.) * (f_numerator / f_denom) * D
+    f_numerator = 3 * rho * (rho - S_prime)
+    f_denom = 2 * (rho ** 2 - 1) 
+    D_parallel = f_numerator / f_denom
+    paren = 2 * (rho ** 2) - 1
+    f_numerator = 3 * rho * (paren * S_prime - rho)
+    f_denom = 2 * (np.power(rho, 4) - 1)
+    D_perp = f_numerator / f_denom
+    print('result: Dpar is {} and Dperp is {}'.format(D_parallel, D_perp))
+    return (D_parallel, D_perp)
 
+def calcTaus(D_parallel, D_perp):
     # Calculate relatation times from anisotropic rotational diffusion coefficients
     tau_1 = 1 / (6 * D_perp)
     tau_2 = 1 / (5 * D_perp + D_parallel)
     tau_3 = 1 / (2 * D_perp + 4 * D_parallel)
-
+    print('{}, {}, {}\n'.format(tau_1,tau_2,tau_3))
     return [tau_1, tau_2, tau_3]
    
 
-def testPlot():
-    # test function pls ignore
+def EllipsoidRotationalProperties():
+    """Calculate diffusion coefficients and rotational relaxation times for 
+    ellipsoids of revolution with some range of axial ratios."""
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.pyplot as plt
     data = dict() 
-    for x in range(1, 11):
-        for y in range(1, 11):
-            x_nm = x * 1e-9
-            y_nm = y * 1e-9
-            data[(x_nm,y_nm)] = calcRelaxationTimes(x_nm, y_nm) 
-    xs = np.zeros(100)
-    ys = np.zeros(100)
-    zs = np.zeros((100, 3))
-    for i, element in enumerate(data.items()):
-        t, z = element
-        xs[i] = t[0]
-        ys[i] = t[1]
-        zs[i] = z
-    tau_1s, tau_2s, tau_3s = np.hsplit(zs, 3)
-    tau_1s = tau_1s.ravel() 
-    tau_2s = tau_2s.ravel() 
-    tau_3s = tau_3s.ravel() 
+    total = 60 
+    split = 20 
+    xs = np.array([x for x in range(total)], dtype=float)
+    D_par = np.zeros(len(xs))
+    D_perp = np.zeros(len(xs))
+    tau1s = np.zeros(len(xs))
+    tau2s = np.zeros(len(xs))
+    tau3s = np.zeros(len(xs))
+    xs /= float(split) 
+    print('{}'.format(xs))
+    for i,x in enumerate(xs):
+        D_par[i], D_perp[i] = calcDiffusionConstants(x)
+        tau1s[i],tau2s[i],tau3s[i] = calcTaus(D_par[i], D_perp[i])
+    
     fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(xs, ys, tau_1s)
-    ax.set_xlabel('Diameter')
-    ax.set_ylabel('Height')
-    ax.set_zlabel('Tau')
+    ax = fig.add_subplot(111)
+    ax.plot(xs, D_par, 'b', xs, D_perp, 'r')
+    ax.set_ylabel('Rotational Diffusion / D$_{sphere}$')
+    ax.set_xlabel('Axial Ratio $\\rho$')
+    fig2 = plt.figure()
+    ax2 = fig2.add_subplot(111) 
+    ax2.plot(xs, tau1s, xs, tau2s, xs, tau3s)
+    ax2.set_ylabel('Rotational correlation time / $\\tau_{sphere}$')
+    ax2.set_xlabel('Axial Ratio $\\rho$')
     plt.show()
