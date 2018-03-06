@@ -8,6 +8,7 @@ def sphereHydrodynamics(V):
     tau = 1 / (6 * D)
     return (D, tau)
 
+
 def calcDiffusionConstants(rho):
     """Calculate the diffusion constants of a disk of given axial ratio, relative to that of a sphere."""
     print('rho is {}'.format(rho))
@@ -15,8 +16,6 @@ def calcDiffusionConstants(rho):
     S_prime = 0.0 
     term_a = float(rho ** 2 - 1)
     term_b = float(1 - rho ** 2)
-    print('term_a: {}'.format(term_a))
-    print('term_b: {}'.format(term_b))
     if rho < 1:
         a  = 1 - (rho**2)
         b = 1./np.sqrt(a)
@@ -30,7 +29,6 @@ def calcDiffusionConstants(rho):
     else:
         print('no111!!!')
         return [1,1] 
-    print('finally, S is {}'.format(S_prime)) 
     # Calculate the anisotropic components of rotational diffusion, i.e. D_parallel and D_perp
     f_numerator = 3 * rho * (rho - S_prime)
     f_denom = 2 * (rho ** 2 - 1) 
@@ -39,7 +37,6 @@ def calcDiffusionConstants(rho):
     f_numerator = 3 * rho * (paren * S_prime - rho)
     f_denom = 2 * (np.power(rho, 4) - 1)
     D_perp = f_numerator / f_denom
-    print('result: Dpar is {} and Dperp is {}'.format(D_parallel, D_perp))
     return (D_parallel, D_perp)
 
 def calcTaus(D_parallel, D_perp):
@@ -47,7 +44,6 @@ def calcTaus(D_parallel, D_perp):
     tau_1 = 1 / (6 * D_perp)
     tau_2 = 1 / (5 * D_perp + D_parallel)
     tau_3 = 1 / (2 * D_perp + 4 * D_parallel)
-    print('{}, {}, {}\n'.format(tau_1,tau_2,tau_3))
     return [tau_1, tau_2, tau_3]
    
 
