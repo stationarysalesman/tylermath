@@ -16,6 +16,7 @@ D1_diam = 9.7e-9
 #D1_diam = 10.2e-9
 D1_height = 5e-9
 D1_rho = D1_height / D1_diam
+#D1_rho = 0.466 
 D1_volume = disc_volume(D1_diam/2, D1_height)
 print('Sphere hydrodynamics for D1 discs:')
 D_0, tau_0=sphereHydrodynamics(D1_volume)
@@ -35,6 +36,7 @@ E3_diam = 11.7e-9
 #E3_diam = 12.7e-9
 E3_height = 5e-9
 E3_rho = E3_height / E3_diam
+#E3_rho = 0.336 
 E3_volume = disc_volume(E3_diam/2, E3_height)
 print('Sphere hydrodynamics for E3 discs:')
 D_0, tau_0=sphereHydrodynamics(E3_volume)
