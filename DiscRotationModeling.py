@@ -12,8 +12,8 @@ def equiv_sphere_radius(volume):
 
 
 # Empty D1 discs
-#D1_diam = 9.7e-9
-D1_diam = 10.2e-9
+D1_diam = 9.7e-9
+#D1_diam = 10.2e-9
 D1_height = 5e-9
 D1_rho = D1_height / D1_diam
 D1_volume = disc_volume(D1_diam/2, D1_height)
@@ -31,8 +31,8 @@ taus=np.array(calcTaus(Dpar_true,Dperp_true))
 print('Taus: {}'.format(taus))
 
 # Empty E3 discs
-#E3_diam = 11.7e-9
-E3_diam = 12.7e-9
+E3_diam = 11.7e-9
+#E3_diam = 12.7e-9
 E3_height = 5e-9
 E3_rho = E3_height / E3_diam
 E3_volume = disc_volume(E3_diam/2, E3_height)
